@@ -2,45 +2,47 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Code Generator</title>
+  <title>Generate Code Snippets</title>
   <style>
-    body { font-family: Arial, sans-serif; max-width: 600px; margin: 2em auto; }
-    textarea { width: 100%; height: 100px; margin-bottom: 1em; }
+    body { font-family: Arial, sans-serif; margin: 2rem; }
+    pre { background: #f0f0f0; padding: 1rem; border-radius: 5px; }
   </style>
 </head>
 <body>
   <h1>Generate Code Snippets</h1>
-  
-  <label for="count">Number of snippets to generate (max 10): </label>
-  <input type="number" id="count" min="1" max="10" value="1" />
-  
+  <label>
+    Number of snippets to generate (max 10):
+    <input id="count" type="number" min="1" max="10" value="3" />
+  </label>
   <button id="generateBtn">Generate</button>
-  
-  <div id="output"></div>
-  
+
+  <div id="result"></div>
+
   <script>
-    const generateBtn = document.getElementById('generateBtn');
-    const output = document.getElementById('output');
-    const countInput = document.getElementById('count');
-    
-    generateBtn.addEventListener('click', async () => {
-      const count = countInput.value;
-      output.innerHTML = 'Generating...';
-      
+    const workerUrl = 'https://winter-shape-f1f2.ravo404-0.workers.dev'; // your worker URL
+
+    document.getElementById('generateBtn').addEventListener('click', async () => {
+      const count = document.getElementById('count').value;
+      const resultDiv = document.getElementById('result');
+      resultDiv.textContent = 'Generating code snippets...';
+
       try {
-        const response = await fetch(`https://winter-shape-f1f2.ravo404-0.workers.dev/?count=${count}`);
+        const response = await fetch(`${workerUrl}?count=${count}`);
         const data = await response.json();
-        
-        output.innerHTML = '';
-        data.snippets.forEach((snippet, i) => {
-          const textarea = document.createElement('textarea');
-          textarea.readOnly = true;
-          textarea.textContent = snippet;
-          output.appendChild(textarea);
-        });
+
+        if (data.error) {
+          resultDiv.textContent = 'Error: ' + data.error;
+          return;
+        }
+
+        if (!data.snippets || data.snippets.length === 0) {
+          resultDiv.textContent = 'No snippets generated.';
+          return;
+        }
+
+        resultDiv.innerHTML = data.snippets.map(code => `<pre>${code}</pre>`).join('');
       } catch (err) {
-        output.textContent = 'Error generating code.';
-        console.error(err);
+        resultDiv.textContent = 'Error generating code: ' + err.message;
       }
     });
   </script>
