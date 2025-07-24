@@ -1,50 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Generate Code Snippets</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 2rem; }
-    pre { background: #f0f0f0; padding: 1rem; border-radius: 5px; }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Generate Code Snippets</title>
 </head>
 <body>
   <h1>Generate Code Snippets</h1>
   <label>
     Number of snippets to generate (max 10):
-    <input id="count" type="number" min="1" max="10" value="3" />
+    <input type="number" id="count" value="1" min="1" max="10" />
   </label>
   <button id="generateBtn">Generate</button>
 
-  <div id="result"></div>
+  <pre id="output" style="white-space: pre-wrap; background:#f0f0f0; padding:10px; margin-top:20px;"></pre>
 
-  <script>
-    const workerUrl = 'https://winter-shape-f1f2.ravo404-0.workers.dev'; // your worker URL
+<script>
+  const workerUrl = 'https://your-worker-url.workers.dev';  // Replace with your worker URL
 
-    document.getElementById('generateBtn').addEventListener('click', async () => {
-      const count = document.getElementById('count').value;
-      const resultDiv = document.getElementById('result');
-      resultDiv.textContent = 'Generating code snippets...';
+  document.getElementById('generateBtn').addEventListener('click', async () => {
+    const countInput = document.getElementById('count');
+    let count = parseInt(countInput.value);
+    if (isNaN(count) || count < 1) count = 1;
+    if (count > 10) count = 10;
 
-      try {
-        const response = await fetch(`${workerUrl}?count=${count}`);
-        const data = await response.json();
+    const output = document.getElementById('output');
+    output.textContent = 'Generating...';
 
-        if (data.error) {
-          resultDiv.textContent = 'Error: ' + data.error;
-          return;
-        }
+    try {
+      const response = await fetch(`${workerUrl}?count=${count}`);
+      if (!response.ok) throw new Error('Network response was not ok');
 
-        if (!data.snippets || data.snippets.length === 0) {
-          resultDiv.textContent = 'No snippets generated.';
-          return;
-        }
-
-        resultDiv.innerHTML = data.snippets.map(code => `<pre>${code}</pre>`).join('');
-      } catch (err) {
-        resultDiv.textContent = 'Error generating code: ' + err.message;
-      }
-    });
-  </script>
+      const data = await response.json();
+      output.textContent = data.snippets.join('\n\n');
+    } catch (error) {
+      output.textContent = 'Error generating code: ' + error.message;
+    }
+  });
+</script>
 </body>
 </html>
