@@ -1,58 +1,32 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <title>Generate Code Snippets</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    textarea { width: 100%; height: 150px; margin-top: 10px; font-family: monospace; }
-    #error { color: red; }
-  </style>
+  <title>Generate KURD Codes</title>
 </head>
 <body>
-
-  <h1>Generate Code Snippets</h1>
-
-  <label>
-    Number of snippets to generate (max 10):
-    <input type="number" id="count" min="1" max="10" value="1" />
-  </label>
+  <h2>Generate KURD Random Codes</h2>
+  <label>Number of snippets to generate (max 10): </label>
+  <input type="number" id="count" min="1" max="10" value="1" />
   <button id="generateBtn">Generate</button>
-
-  <div id="error"></div>
-  <textarea id="output" readonly></textarea>
+  <pre id="output" style="white-space: pre-wrap; margin-top: 20px; border: 1px solid #ccc; padding: 10px;"></pre>
 
   <script>
-    const generateBtn = document.getElementById('generateBtn');
-    const countInput = document.getElementById('count');
-    const output = document.getElementById('output');
-    const errorDiv = document.getElementById('error');
+    const workerUrl = 'https://winter-shape-f1f2.ravo404-0.workers.dev/'; // change this to your deployed worker URL
 
-    // Your Cloudflare Worker URL
-    const WORKER_URL = 'https://winter-shape-f1f2.ravo404-0.workers.dev/';
-
-    generateBtn.addEventListener('click', async () => {
-      errorDiv.textContent = '';
-      output.value = '';
-      let count = parseInt(countInput.value);
-
-      if (!count || count < 1 || count > 10) {
-        errorDiv.textContent = 'Please enter a number between 1 and 10.';
-        return;
-      }
+    document.getElementById('generateBtn').addEventListener('click', async () => {
+      const count = document.getElementById('count').value;
+      const output = document.getElementById('output');
+      output.textContent = 'Loading...';
 
       try {
-        const response = await fetch(`${WORKER_URL}?count=${count}`);
-        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-
-        const data = await response.json();
-
-        output.value = data.snippets.join('\n\n');
-      } catch (error) {
-        errorDiv.textContent = 'Error generating code: ' + error.message;
+        const res = await fetch(`${workerUrl}?count=${count}`);
+        if (!res.ok) throw new Error('Failed to fetch');
+        const text = await res.text();
+        output.textContent = text;
+      } catch (err) {
+        output.textContent = 'Error generating code: ' + err.message;
       }
     });
   </script>
-
 </body>
 </html>
